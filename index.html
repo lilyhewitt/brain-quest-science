@@ -30,7 +30,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #nextBtn{background:#4A3A8C;border-color:#4A3A8C;color:#fff}
 #knowBtn{background:#0F6E56;border-color:#0F6E56;color:#fff}
 #againBtn{background:#FFF4E0;border-color:#E9B95E;color:#7A4E00}
-#stage{position:relative;display:flex;align-items:center;justify-content:center;perspective:1600px;min-width:0;min-height:0}
+#stage{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;perspective:1600px;min-width:0;min-height:0}
 #flip{position:relative;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.3,.7,.3,1)}
 #flip.on{transform:rotateY(180deg)}
 .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
@@ -123,7 +123,7 @@ let flipped=false;
 function front(u,c,i){return `<div class="card"><div class="band fr" style="background:${u.color}"><span class="code">${u.code}</span> ${u.en} ${u.zh}<span class="qn">Q${i+1}</span><span class="st">${stars(c.lv)}</span></div><div class="q">${esc(c.q)}</div><div class="qz">${c.qz}</div><div class="img">${c.pic}</div></div>`}
 function back(u,c,i){return `<div class="card bk"><div class="band ab"><span class="code">${u.code}</span> ANSWER 答案<span class="qn">Q${i+1}</span></div><div class="a">${esc(c.a)}</div><div class="az">${c.az}</div><div class="sp"></div><div class="say"><span class="lab">★ 拿分魔法句</span>${esc(c.s)}</div>${c.f?`<div class="fun" style="border-color:${u.color}">${esc(c.f)}</div>`:""}</div>`}
 function knownCount(u){return U[u].cards.filter(c=>st.known[c.id]).length}
-function fit(){const s=$("stage"),r=s.getBoundingClientRect();const k=Math.min((r.width-4)/CW,(r.height-20)/CH);const f=$("flip");f.style.width=CW*k+"px";f.style.height=CH*k+"px";f.style.marginBottom="16px";document.querySelectorAll(".scaler").forEach(e=>e.style.transform=`scale(${k})`)}
+function fit(){const s=$("stage"),r=s.getBoundingClientRect();const vh=(window.visualViewport?visualViewport.height:innerHeight);const h=Math.min(r.height,vh-r.top-8);const k=Math.max(.2,Math.min((r.width-4)/CW,(h-22)/CH));const f=$("flip");f.style.width=CW*k+"px";f.style.height=CH*k+"px";f.style.marginBottom="16px";document.querySelectorAll(".scaler").forEach(e=>e.style.transform=`scale(${k})`)}
 function render(){
   const u=U[st.u];if(st.i>=u.cards.length)st.i=0;
   const c=u.cards[st.i];
@@ -170,6 +170,9 @@ $("unitBtn").onclick=openSheet;$("closeSheet").onclick=closeSheet;
 $("sheet").onclick=e=>{if(e.target.id==="sheet")closeSheet()};
 document.addEventListener("keydown",e=>{if(e.key===" ")setFlip(!flipped);if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1)});
 addEventListener("resize",fit);
+addEventListener("orientationchange",()=>{fit();setTimeout(fit,250);setTimeout(fit,700)});
+if(window.visualViewport)visualViewport.addEventListener("resize",fit);
+if(window.ResizeObserver)new ResizeObserver(()=>fit()).observe($("stage"));
 try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock("landscape").catch(()=>{})}catch(e){}
 if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 render();
